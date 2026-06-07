@@ -14,53 +14,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Setup Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Set JAVA_HOME to 17
+      - name: Build APK with Docker
         run: |
-          echo "JAVA_HOME=$JAVA_HOME_17_X64" >> $GITHUB_ENV
-          echo "$JAVA_HOME_17_X64/bin" >> $GITHUB_PATH
-
-      - name: Install Buildozer dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            python3-pip \
-            build-essential \
-            git \
-            libsdl2-dev \
-            libsdl2-image-dev \
-            libsdl2-mixer-dev \
-            libsdl2-ttf-dev \
-            libportmidi-dev \
-            zlib1g-dev \
-            libsqlite3-dev \
-            ccache \
-            autoconf \
-            libtool \
-            pkg-config \
-            libncurses5-dev \
-            libncursesw5-dev \
-            cmake \
-            libffi-dev \
-            libssl-dev
-
-      - name: Install Buildozer and Cython
-        run: |
-          pip install buildozer==1.5.0 cython==0.29.36
-
-      - name: Build APK
-        run: |
-          buildozer android debug
+          docker run --rm \
+            -v $(pwd):/home/user/hostcwd \
+            kivy/buildozer:latest \
+            android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
