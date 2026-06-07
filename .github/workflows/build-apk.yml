@@ -1,0 +1,46 @@
+name: Build ChartMind AI APK
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install Flet
+        run: pip install flet==0.21.2
+
+      - name: Install dependencies
+        run: pip install groq Pillow python-dotenv
+
+      - name: Build APK
+        run: flet build apk --project "ChartMind AI"
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: ChartMind-AI-APK
+          path: build/apk/app-release.apk
