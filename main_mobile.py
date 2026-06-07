@@ -32,12 +32,10 @@ from kivy.clock import Clock
 from kivy.metrics import dp
 from kivy.graphics import Color, Rectangle
 
-# Colors
 GOLD = get_color_from_hex("#f59e0b")
 GREEN = get_color_from_hex("#10b981")
 RED = get_color_from_hex("#ef4444")
 BLUE = get_color_from_hex("#3b82f6")
-BG_DARK = get_color_from_hex("#0a0c0f")
 BG2 = get_color_from_hex("#111318")
 BG3 = get_color_from_hex("#0d1117")
 WHITE = get_color_from_hex("#e2e8f0")
@@ -106,8 +104,10 @@ class HomeScreen(Screen):
             Color(*BG2)
             self.header_rect = Rectangle(
                 pos=header.pos, size=header.size)
-        header.bind(pos=lambda i, v: setattr(self.header_rect, 'pos', v))
-        header.bind(size=lambda i, v: setattr(self.header_rect, 'size', v))
+        header.bind(pos=lambda i, v: setattr(
+            self.header_rect, 'pos', v))
+        header.bind(size=lambda i, v: setattr(
+            self.header_rect, 'size', v))
         header.add_widget(make_label(
             "CHARTMIND AI", color=GOLD, size=16, bold=True))
         header.add_widget(make_label(
@@ -205,9 +205,9 @@ class HomeScreen(Screen):
             spacing=dp(8),
             padding=dp(8)
         )
-
-        # Try phone storage paths
-        start_path = '/sdcard'
+        start_path = '/sdcard/DCIM'
+        if not os.path.exists(start_path):
+            start_path = '/sdcard'
         if not os.path.exists(start_path):
             start_path = os.path.expanduser('~')
 
@@ -263,10 +263,7 @@ class HomeScreen(Screen):
             self.update_status("File not found.", "#ef4444")
             return
         try:
-            dest = os.path.join(
-                os.path.dirname(os.path.abspath(__file__)),
-                LIVE_CHART_PATH
-            )
+            dest = LIVE_CHART_PATH
             shutil.copy(path, dest)
             self.chart_image.source = dest
             self.chart_image.reload()
@@ -313,12 +310,8 @@ class HomeScreen(Screen):
         self.result_layout.clear_widgets()
         self.result_layout.height = dp(300)
         try:
-            img_path = os.path.join(
-                os.path.dirname(os.path.abspath(__file__)),
-                ANALYZED_IMAGE_PATH
-            )
             img = Image(
-                source=img_path,
+                source=ANALYZED_IMAGE_PATH,
                 size_hint=(1, None),
                 height=dp(220),
                 allow_stretch=True,

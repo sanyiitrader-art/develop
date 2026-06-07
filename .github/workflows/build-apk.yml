@@ -37,15 +37,11 @@ jobs:
             python3-pip \
             build-essential \
             git \
-            ffmpeg \
             libsdl2-dev \
             libsdl2-image-dev \
             libsdl2-mixer-dev \
             libsdl2-ttf-dev \
             libportmidi-dev \
-            libswscale-dev \
-            libavformat-dev \
-            libavcodec-dev \
             zlib1g-dev \
             libsqlite3-dev \
             ccache \
@@ -58,9 +54,9 @@ jobs:
             libffi-dev \
             libssl-dev
 
-      - name: Install Buildozer
+      - name: Install Buildozer and Cython
         run: |
-          pip install buildozer cython
+          pip install buildozer==1.5.0 cython==0.29.37
 
       - name: Build APK
         run: |

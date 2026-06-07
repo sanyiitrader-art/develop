@@ -7,7 +7,7 @@ source.include_exts = py,png,jpg,jpeg,json,env
 source.include_patterns = assets/*,core/*,history_data/*
 version = 1.0
 icon.filename = %(source.dir)s/icon.png
-requirements = python3,kivy,groq,pillow,python-dotenv,requests,certifi,urllib3,idna,anyio,sniffio,distro,httpx,httpcore,pydantic,pydantic-core,typing-extensions,typing-inspection,annotated-types
+requirements = python3,kivy==2.3.0,pillow==10.4.0,groq,python-dotenv,requests,certifi,urllib3,idna,anyio,sniffio,distro,httpx,httpcore,pydantic,typing-extensions
 orientation = portrait
 fullscreen = 0
 android.permissions = INTERNET,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE
@@ -18,6 +18,7 @@ android.sdk = 33
 android.accept_sdk_license = True
 android.archs = arm64-v8a, armeabi-v7a
 android.logcat_filters = *:S python:D
+
 [buildozer]
 log_level = 2
 warn_on_root = 1
