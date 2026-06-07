@@ -1,323 +1,399 @@
-import flet as ft
 import os
 import threading
 import shutil
+from kivy.app import App
+from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.button import Button
+from kivy.uix.label import Label
+from kivy.uix.image import Image
+from kivy.uix.filechooser import FileChooserIconView
+from kivy.uix.popup import Popup
+from kivy.uix.gridlayout import GridLayout
+from kivy.core.window import Window
+from kivy.utils import get_color_from_hex
+from kivy.clock import Clock
+from kivy.metrics import dp
+
 from core.analyser import analyse_chart
 from core.drawer import draw_levels
 from core.history import save_analysis, load_history
 from config import ANALYZED_IMAGE_PATH, LIVE_CHART_PATH
 
-GOLD = "#f59e0b"
-GREEN = "#10b981"
-RED = "#ef4444"
-BLUE = "#3b82f6"
-BG2 = "#111318"
-BG3 = "#0d1117"
+# Colors
+GOLD = get_color_from_hex("#f59e0b")
+GREEN = get_color_from_hex("#10b981")
+RED = get_color_from_hex("#ef4444")
+BLUE = get_color_from_hex("#3b82f6")
+BG_DARK = get_color_from_hex("#0a0c0f")
+BG2 = get_color_from_hex("#111318")
+BG3 = get_color_from_hex("#0d1117")
+WHITE = get_color_from_hex("#e2e8f0")
+GRAY = get_color_from_hex("#4a5568")
+
+Window.clearcolor = get_color_from_hex("#0a0c0f")
 
 
-def main(page: ft.Page):
-    page.title = "ChartMind AI"
-    page.theme_mode = ft.ThemeMode.DARK
-    page.bgcolor = "#0a0c0f"
-    page.padding = 16
-    page.scroll = ft.ScrollMode.AUTO
-    page.window_width = 390
-    page.window_height = 844
-
-    current_analysis = {"data": None}
-
-    # ── STATUS ──────────────────────────────────────────────
-    status_text = ft.Text(
-        "Upload a chart to begin",
-        size=12, color="#4a5568",
-        text_align=ft.TextAlign.CENTER
+def make_button(text, bg_color, text_color, callback, height=50):
+    btn = Button(
+        text=text,
+        size_hint=(1, None),
+        height=dp(height),
+        background_normal='',
+        background_color=bg_color,
+        color=text_color,
+        font_size=dp(14),
+        bold=True
     )
+    btn.bind(on_press=callback)
+    return btn
 
-    # ── CHART IMAGE ─────────────────────────────────────────
-    chart_image = ft.Image(
-        src="assets/live_chart.png",
-        width=360, height=200,
-        visible=False,
+
+def make_label(text, color=None, size=14, bold=False, align='left'):
+    if color is None:
+        color = WHITE
+    lbl = Label(
+        text=text,
+        color=color,
+        font_size=dp(size),
+        bold=bold,
+        halign=align,
+        valign='middle',
+        size_hint_y=None,
     )
+    lbl.bind(texture_size=lambda instance, value: setattr(instance, 'height', value[1] + dp(8)))
+    lbl.bind(width=lambda instance, value: setattr(instance, 'text_size', (value, None)))
+    return lbl
 
-    chart_placeholder = ft.Container(
-        content=ft.Column([
-            ft.Text("📈", size=40),
-            ft.Text("No chart uploaded yet",
-                    size=13, color="#2d3748",
-                    text_align=ft.TextAlign.CENTER),
-        ],
-        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-        alignment=ft.MainAxisAlignment.CENTER),
-        width=360, height=200,
-        bgcolor=BG3,
-        border_radius=10,
-    )
 
-    # ── DIRECTION BADGE ─────────────────────────────────────
-    direction_text = ft.Text(
-        "—", size=36,
-        weight=ft.FontWeight.BOLD,
-        color="#2d3748",
-        text_align=ft.TextAlign.CENTER
-    )
-    direction_badge = ft.Container(
-        content=direction_text,
-        bgcolor=BG3,
-        border_radius=10,
-        padding=12,
-        width=360,
-        visible=False,
-    )
+class HomeScreen(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.current_analysis = None
+        self.build_ui()
 
-    # ── ENTRY INFO ──────────────────────────────────────────
-    entry_info = ft.Container(visible=False, width=360)
+    def build_ui(self):
+        # Main scroll layout
+        scroll = ScrollView()
+        main = BoxLayout(
+            orientation='vertical',
+            padding=dp(16),
+            spacing=dp(12),
+            size_hint_y=None
+        )
+        main.bind(minimum_height=main.setter('height'))
 
-    # ── ANALYSIS TEXT ───────────────────────────────────────
-    analysis_box = ft.Container(
-        visible=False,
-        width=360,
-        height=340,
-        bgcolor=BG3,
-        border_radius=10,
-        padding=14,
-    )
+        # Header
+        header = BoxLayout(
+            size_hint=(1, None),
+            height=dp(60),
+            padding=dp(8)
+        )
+        from kivy.graphics import Color, Rectangle
+        with header.canvas.before:
+            Color(*get_color_from_hex("#111318"))
+            self.header_rect = Rectangle(pos=header.pos, size=header.size)
+        header.bind(pos=lambda i, v: setattr(self.header_rect, 'pos', v))
+        header.bind(size=lambda i, v: setattr(self.header_rect, 'size', v))
 
-    # ── OPTIONS ─────────────────────────────────────────────
-    options_col = ft.Container(visible=False)
+        header.add_widget(make_label(
+            "📊  CHARTMIND AI",
+            color=GOLD, size=16, bold=True))
+        header.add_widget(make_label(
+            "● AI Ready",
+            color=GREEN, size=12, align='right'))
+        main.add_widget(header)
 
-    def show_image_result(e):
-        if not current_analysis["data"]:
+        # Status label
+        self.status_label = make_label(
+            "Upload a chart to begin",
+            color=GRAY, size=12, align='center')
+        main.add_widget(self.status_label)
+
+        # Chart image placeholder
+        self.chart_image = Image(
+            source='assets/live_chart.png',
+            size_hint=(1, None),
+            height=dp(200),
+            allow_stretch=True,
+            keep_ratio=True
+        )
+        main.add_widget(self.chart_image)
+
+        # Upload button
+        upload_btn = make_button(
+            "📷  Upload Chart",
+            bg_color=get_color_from_hex("#1a1500"),
+            text_color=GOLD,
+            callback=self.open_file_picker,
+            height=52
+        )
+        main.add_widget(upload_btn)
+
+        # Options section (hidden until analysis done)
+        self.options_layout = BoxLayout(
+            orientation='vertical',
+            spacing=dp(8),
+            size_hint=(1, None),
+            height=dp(0)
+        )
+
+        options_title = make_label(
+            "How do you want to see the result?",
+            color=GRAY, size=12, align='center')
+
+        btn_image = make_button(
+            "📈  By Image",
+            bg_color=get_color_from_hex("#1a2a1a"),
+            text_color=GREEN,
+            callback=self.show_image_result
+        )
+        btn_desc = make_button(
+            "📝  By Description",
+            bg_color=get_color_from_hex("#111a2e"),
+            text_color=BLUE,
+            callback=self.show_description
+        )
+        btn_signal = make_button(
+            "⚡  Buy or Sell",
+            bg_color=get_color_from_hex("#1a1500"),
+            text_color=GOLD,
+            callback=self.show_direction
+        )
+
+        self.options_layout.add_widget(options_title)
+        self.options_layout.add_widget(btn_image)
+        self.options_layout.add_widget(btn_desc)
+        self.options_layout.add_widget(btn_signal)
+        main.add_widget(self.options_layout)
+
+        # Result area
+        self.result_layout = BoxLayout(
+            orientation='vertical',
+            spacing=dp(8),
+            size_hint=(1, None),
+            height=dp(0)
+        )
+        main.add_widget(self.result_layout)
+
+        # History section
+        main.add_widget(make_label(
+            "RECENT HISTORY",
+            color=GRAY, size=9, bold=True))
+
+        self.history_layout = BoxLayout(
+            orientation='vertical',
+            spacing=dp(6),
+            size_hint=(1, None),
+            height=dp(0)
+        )
+        main.add_widget(self.history_layout)
+
+        scroll.add_widget(main)
+        self.add_widget(scroll)
+        self.load_history()
+
+    def open_file_picker(self, instance):
+        content = BoxLayout(orientation='vertical', spacing=dp(8), padding=dp(8))
+        chooser = FileChooserIconView(
+            filters=['*.png', '*.jpg', '*.jpeg', '*.webp'],
+            path=os.path.expanduser('~')
+        )
+        content.add_widget(chooser)
+
+        btn_row = BoxLayout(size_hint=(1, None), height=dp(50), spacing=dp(8))
+        select_btn = Button(
+            text='Select',
+            background_normal='',
+            background_color=get_color_from_hex("#f59e0b"),
+            color=get_color_from_hex("#000000"),
+            bold=True
+        )
+        cancel_btn = Button(
+            text='Cancel',
+            background_normal='',
+            background_color=get_color_from_hex("#1e2330"),
+            color=WHITE
+        )
+        btn_row.add_widget(select_btn)
+        btn_row.add_widget(cancel_btn)
+        content.add_widget(btn_row)
+
+        popup = Popup(
+            title='Select Chart Image',
+            content=content,
+            size_hint=(0.95, 0.85),
+            background_color=get_color_from_hex("#111318"),
+            title_color=GOLD
+        )
+
+        def on_select(inst):
+            if chooser.selection:
+                popup.dismiss()
+                self.load_image(chooser.selection[0])
+
+        def on_cancel(inst):
+            popup.dismiss()
+
+        select_btn.bind(on_press=on_select)
+        cancel_btn.bind(on_press=on_cancel)
+        popup.open()
+
+    def load_image(self, path):
+        if not os.path.exists(path):
             return
-        if os.path.exists(ANALYZED_IMAGE_PATH):
-            chart_image.src = ANALYZED_IMAGE_PATH
-            chart_image.visible = True
-            chart_placeholder.visible = False
-            entry_info.visible = True
-            analysis_box.visible = False
-            direction_badge.visible = False
-            page.update()
+        shutil.copy(path, LIVE_CHART_PATH)
+        self.chart_image.source = LIVE_CHART_PATH
+        self.chart_image.reload()
+        self.update_status("Chart loaded. Analysing...", "#f59e0b")
+        self.options_layout.height = dp(0)
+        self.result_layout.height = dp(0)
+        self.result_layout.clear_widgets()
+        threading.Thread(target=self.run_analysis, daemon=True).start()
 
-    def show_description_result(e):
-        if not current_analysis["data"]:
-            return
-        deep = current_analysis["data"].get(
-            "deep_analysis", "No analysis available.")
-        analysis_box.content = ft.Column([
-            ft.Text("🧠 Full Analysis", size=13,
-                    weight=ft.FontWeight.BOLD, color=GOLD),
-            ft.Text(deep, size=11, color="#cbd5e1", selectable=True),
-        ], scroll=ft.ScrollMode.AUTO)
-        analysis_box.visible = True
-        entry_info.visible = False
-        direction_badge.visible = False
-        page.update()
+    def run_analysis(self):
+        result = analyse_chart(LIVE_CHART_PATH)
+        Clock.schedule_once(lambda dt: self.on_analysis_done(result))
 
-    def show_direction_result(e):
-        if not current_analysis["data"]:
+    def on_analysis_done(self, result):
+        if result:
+            self.current_analysis = result
+            draw_levels(result)
+            save_analysis(result, ANALYZED_IMAGE_PATH)
+            self.update_status("✅ Analysis complete — choose view below", "#10b981")
+            self.options_layout.height = dp(220)
+            self.load_history()
+        else:
+            self.update_status("❌ Analysis failed. Try again.", "#ef4444")
+
+    def show_image_result(self, instance):
+        if not self.current_analysis:
             return
-        direction = current_analysis["data"].get("direction", "NEUTRAL")
-        color = (GREEN if direction == "BUY"
-                 else RED if direction == "SELL"
+        self.result_layout.clear_widgets()
+        self.result_layout.height = dp(300)
+
+        # Show analyzed chart
+        img = Image(
+            source=ANALYZED_IMAGE_PATH,
+            size_hint=(1, None),
+            height=dp(220),
+            allow_stretch=True,
+            keep_ratio=True
+        )
+        img.reload()
+
+        # Levels row
+        levels = GridLayout(
+            cols=4,
+            size_hint=(1, None),
+            height=dp(60),
+            spacing=dp(4)
+        )
+        a = self.current_analysis
+        for label, value, color in [
+            ("ENTRY", a.get("entry", "—"), "#00bfff"),
+            ("SL", a.get("stop_loss", "—"), "#ef4444"),
+            ("TP", a.get("take_profit", "—"), "#10b981"),
+            ("R:R", a.get("risk_reward", "—"), "#f59e0b"),
+        ]:
+            col = BoxLayout(orientation='vertical')
+            col.add_widget(make_label(label, color=GRAY, size=9, bold=True, align='center'))
+            col.add_widget(make_label(value, color=get_color_from_hex(color), size=11, bold=True, align='center'))
+            levels.add_widget(col)
+
+        self.result_layout.add_widget(img)
+        self.result_layout.add_widget(levels)
+
+    def show_description(self, instance):
+        if not self.current_analysis:
+            return
+        deep = self.current_analysis.get("deep_analysis", "No analysis available.")
+        self.result_layout.clear_widgets()
+        self.result_layout.height = dp(400)
+
+        scroll = ScrollView(size_hint=(1, None), height=dp(400))
+        box = BoxLayout(orientation='vertical', size_hint_y=None, padding=dp(8))
+        box.bind(minimum_height=box.setter('height'))
+        box.add_widget(make_label("🧠 Full Analysis", color=GOLD, size=13, bold=True))
+        box.add_widget(make_label(deep, color=WHITE, size=11))
+        scroll.add_widget(box)
+        self.result_layout.add_widget(scroll)
+
+    def show_direction(self, instance):
+        if not self.current_analysis:
+            return
+        direction = self.current_analysis.get("direction", "NEUTRAL")
+        color = ("#10b981" if direction == "BUY"
+                 else "#ef4444" if direction == "SELL"
                  else "#94a3b8")
-        bg = ("#0a1f14" if direction == "BUY"
-              else "#1f0a0a" if direction == "SELL"
-              else BG3)
-        direction_text.value = direction
-        direction_text.color = color
-        direction_badge.bgcolor = bg
-        direction_badge.visible = True
-        entry_info.visible = False
-        analysis_box.visible = False
-        page.update()
+        self.result_layout.clear_widgets()
+        self.result_layout.height = dp(120)
 
-    options_col = ft.Container(
-        content=ft.Column([
-            ft.Text("How do you want to see the result?",
-                    size=12, color="#8892a4",
-                    text_align=ft.TextAlign.CENTER),
-            ft.ElevatedButton(
-                "📈  By Image",
-                on_click=show_image_result,
-                bgcolor="#1a2a1a",
-                color=GREEN,
-                width=340, height=50,
-            ),
-            ft.ElevatedButton(
-                "📝  By Description",
-                on_click=show_description_result,
-                bgcolor="#111a2e",
-                color=BLUE,
-                width=340, height=50,
-            ),
-            ft.ElevatedButton(
-                "⚡  Buy or Sell",
-                on_click=show_direction_result,
-                bgcolor="#1a1500",
-                color=GOLD,
-                width=340, height=50,
-            ),
-        ],
-        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-        spacing=8),
-        visible=False,
-        padding=8,
-    )
+        badge = Label(
+            text=direction,
+            font_size=dp(48),
+            bold=True,
+            color=get_color_from_hex(color),
+            size_hint=(1, None),
+            height=dp(120)
+        )
+        self.result_layout.add_widget(badge)
 
-    # ── ANALYSIS ENGINE ─────────────────────────────────────
-    def run_analysis(image_path):
-        status_text.value = "🧠 AI Analysing chart..."
-        status_text.color = GOLD
-        page.update()
+    def update_status(self, text, color_hex):
+        self.status_label.text = text
+        self.status_label.color = get_color_from_hex(color_hex)
 
-        def _analyse():
-            result = analyse_chart(image_path)
-            if result:
-                current_analysis["data"] = result
-                draw_levels(result)
-                save_analysis(result, ANALYZED_IMAGE_PATH)
-
-                entry_info.content = ft.Row([
-                    ft.Column([
-                        ft.Text("ENTRY", size=9, color="#4a5568",
-                                weight=ft.FontWeight.BOLD),
-                        ft.Text(result.get("entry", "—"),
-                                size=11, color="#00bfff",
-                                weight=ft.FontWeight.BOLD),
-                    ], horizontal_alignment=ft.CrossAxisAlignment.CENTER),
-                    ft.Column([
-                        ft.Text("SL", size=9, color="#4a5568",
-                                weight=ft.FontWeight.BOLD),
-                        ft.Text(result.get("stop_loss", "—"),
-                                size=11, color=RED,
-                                weight=ft.FontWeight.BOLD),
-                    ], horizontal_alignment=ft.CrossAxisAlignment.CENTER),
-                    ft.Column([
-                        ft.Text("TP", size=9, color="#4a5568",
-                                weight=ft.FontWeight.BOLD),
-                        ft.Text(result.get("take_profit", "—"),
-                                size=11, color=GREEN,
-                                weight=ft.FontWeight.BOLD),
-                    ], horizontal_alignment=ft.CrossAxisAlignment.CENTER),
-                    ft.Column([
-                        ft.Text("R:R", size=9, color="#4a5568",
-                                weight=ft.FontWeight.BOLD),
-                        ft.Text(result.get("risk_reward", "—"),
-                                size=11, color=GOLD,
-                                weight=ft.FontWeight.BOLD),
-                    ], horizontal_alignment=ft.CrossAxisAlignment.CENTER),
-                ],
-                alignment=ft.MainAxisAlignment.SPACE_AROUND)
-                entry_info.visible = True
-                options_col.visible = True
-                status_text.value = "✅ Done — choose view below"
-                status_text.color = GREEN
-            else:
-                status_text.value = "❌ Analysis failed. Try again."
-                status_text.color = RED
-            page.update()
-
-        thread = threading.Thread(target=_analyse, daemon=True)
-        thread.start()
-
-    # ── FILE PICKER ─────────────────────────────────────────
-    def on_file_picked(e: ft.FilePickerResultEvent):
-        if not e.files:
-            return
-        src_path = e.files[0].path
-        if not src_path or not os.path.exists(src_path):
-            status_text.value = "Could not read file."
-            status_text.color = RED
-            page.update()
-            return
-        shutil.copy(src_path, LIVE_CHART_PATH)
-        chart_image.src = LIVE_CHART_PATH
-        chart_image.visible = True
-        chart_placeholder.visible = False
-        options_col.visible = False
-        direction_badge.visible = False
-        entry_info.visible = False
-        analysis_box.visible = False
-        status_text.value = "Chart loaded. Analysing..."
-        status_text.color = GOLD
-        page.update()
-        run_analysis(LIVE_CHART_PATH)
-
-    file_picker = ft.FilePicker(on_result=on_file_picked)
-    page.overlay.append(file_picker)
-
-    # ── UPLOAD BUTTON ───────────────────────────────────────
-    upload_btn = ft.ElevatedButton(
-        "📷  Upload Chart",
-        on_click=lambda e: file_picker.pick_files(
-            allowed_extensions=["png", "jpg", "jpeg", "webp"],
-            allow_multiple=False,
-        ),
-        bgcolor="#1a1500",
-        color=GOLD,
-        width=340,
-        height=52,
-    )
-
-    # ── HISTORY ─────────────────────────────────────────────
-    def build_history():
+    def load_history(self):
+        self.history_layout.clear_widgets()
         history = load_history()
         if not history:
-            return ft.Text("No history yet.", size=12, color="#2d3748")
-        rows = []
+            self.history_layout.add_widget(
+                make_label("No history yet.", color=GRAY, size=12))
+            self.history_layout.height = dp(40)
+            return
+
+        total_height = 0
         for h in history[:10]:
             direction = h.get("direction", "—")
-            color = (GREEN if direction == "BUY"
-                     else RED if direction == "SELL"
+            color = ("#10b981" if direction == "BUY"
+                     else "#ef4444" if direction == "SELL"
                      else "#94a3b8")
-            rows.append(ft.Container(
-                content=ft.Row([
-                    ft.Text(direction, size=11,
-                            weight=ft.FontWeight.BOLD,
-                            color=color, width=60),
-                    ft.Text(h.get("timestamp", ""),
-                            size=10, color="#4a5568",
-                            expand=True),
-                    ft.Text(f"R:R {h.get('risk_reward','—')}",
-                            size=10, color=GOLD),
-                ]),
-                bgcolor=BG2,
-                border_radius=8,
-                padding=10,
-            ))
-        return ft.Column(rows, spacing=6)
+            row = BoxLayout(
+                size_hint=(1, None),
+                height=dp(44),
+                spacing=dp(8),
+                padding=dp(8)
+            )
+            from kivy.graphics import Color, Rectangle
+            with row.canvas.before:
+                Color(*get_color_from_hex("#111318"))
+                rect = Rectangle(pos=row.pos, size=row.size)
+            row.bind(pos=lambda i, v, r=rect: setattr(r, 'pos', v))
+            row.bind(size=lambda i, v, r=rect: setattr(r, 'size', v))
 
-    # ── LAYOUT ──────────────────────────────────────────────
-    page.add(
-        ft.Container(
-            content=ft.Row([
-                ft.Text("📊  CHARTMIND AI", size=16,
-                        weight=ft.FontWeight.BOLD, color=GOLD),
-                ft.Container(expand=True),
-                ft.Text("● Ready", size=11, color=GREEN),
-            ]),
-            bgcolor=BG2,
-            padding=14,
-        ),
-        ft.Container(height=12),
-        status_text,
-        ft.Container(height=12),
-        chart_placeholder,
-        chart_image,
-        ft.Container(height=12),
-        upload_btn,
-        ft.Container(height=8),
-        options_col,
-        direction_badge,
-        entry_info,
-        analysis_box,
-        ft.Container(height=16),
-        ft.Text("RECENT HISTORY", size=9, color="#2d3748",
-                weight=ft.FontWeight.BOLD),
-        ft.Container(height=6),
-        build_history(),
-        ft.Container(height=24),
-    )
+            row.add_widget(make_label(
+                direction, color=get_color_from_hex(color),
+                size=11, bold=True))
+            row.add_widget(make_label(
+                h.get("timestamp", ""), color=GRAY, size=10))
+            row.add_widget(make_label(
+                f"R:R {h.get('risk_reward', '—')}",
+                color=GOLD, size=10, align='right'))
+
+            self.history_layout.add_widget(row)
+            total_height += dp(44)
+
+        self.history_layout.height = total_height
 
 
-ft.app(target=main)
+class ChartMindApp(App):
+    def build(self):
+        self.title = "ChartMind AI"
+        sm = ScreenManager()
+        sm.add_widget(HomeScreen(name='home'))
+        return sm
+
+
+if __name__ == '__main__':
+    ChartMindApp().run()

@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 60
 
     steps:
@@ -19,41 +19,49 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.24.0'
-          channel: 'stable'
-          cache: true
-
-      - name: Install dependencies
+      - name: Install Buildozer dependencies
         run: |
-          pip install flet==0.21.2
-          pip install groq Pillow python-dotenv
+          sudo apt-get update
+          sudo apt-get install -y \
+            python3-pip \
+            build-essential \
+            git \
+            ffmpeg \
+            libsdl2-dev \
+            libsdl2-image-dev \
+            libsdl2-mixer-dev \
+            libsdl2-ttf-dev \
+            libportmidi-dev \
+            libswscale-dev \
+            libavformat-dev \
+            libavcodec-dev \
+            zlib1g-dev \
+            libgstreamer1.0-dev \
+            gstreamer1.0-plugins-base \
+            gstreamer1.0-plugins-good \
+            libsqlite3-dev \
+            ccache \
+            autoconf \
+            libtool \
+            pkg-config \
+            libncurses5-dev \
+            libncursesw5-dev \
+            libtinfo5 \
+            cmake \
+            libffi-dev \
+            libssl-dev \
+            openjdk-17-jdk
 
-      - name: Accept Android licenses
+      - name: Install Buildozer
         run: |
-          yes | sdkmanager --licenses || true
+          pip install buildozer cython
 
       - name: Build APK
         run: |
-          export PIP_NO_BUILD_ISOLATION=1
-          flet build apk --project "ChartMind AI"
-
-      - name: Find APK
-        run: find . -name "*.apk" 2>/dev/null
+          buildozer android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: ChartMind-AI-APK
-          path: |
-            build/apk/*.apk
-            **/*.apk
-          if-no-files-found: warn
+          path: bin/*.apk
