@@ -5,6 +5,7 @@ package.domain = org.chartmind
 source.dir = .
 source.include_exts = py,png,jpg,jpeg,json,env
 version = 1.0
+icon.filename = %(source.dir)s/icon.png
 requirements = python3,kivy,groq,pillow,python-dotenv
 orientation = portrait
 osx.python_version = 3
