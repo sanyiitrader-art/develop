@@ -1,5 +1,151 @@
 [
   {
+    "id": 19,
+    "timestamp": "2026-06-07 12:00:04",
+    "direction": "SELL",
+    "bias": "bearish",
+    "confidence": 80,
+    "entry": "4327.160",
+    "stop_loss": "4350.000",
+    "take_profit": "4300.000",
+    "risk_reward": "1:2",
+    "confluences": [
+      "Order Block",
+      "FVG",
+      "Liquidity Pool",
+      "Imbalance"
+    ],
+    "short_analysis": "The chart shows a clear downtrend with a recent lower high and lower low. The price is currently trading below a key resistance level.",
+    "image_path": "assets/analyzed_chart.png"
+  },
+  {
+    "id": 18,
+    "timestamp": "2026-06-07 11:52:37",
+    "direction": "SELL",
+    "bias": "bearish",
+    "confidence": 80,
+    "entry": "4327.885",
+    "stop_loss": "4350.000",
+    "take_profit": "4300.000",
+    "risk_reward": "1:2",
+    "confluences": [
+      "Order Block",
+      "FVG",
+      "Liquidity Pool",
+      "Bearish Order Block"
+    ],
+    "short_analysis": "The chart shows a clear downtrend with a recent Lower Low and Lower High, indicating bearish market structure. The price is currently at a significant level, with a potential for further downside.",
+    "image_path": "assets/analyzed_chart.png"
+  },
+  {
+    "id": 17,
+    "timestamp": "2026-06-07 10:28:10",
+    "direction": "SELL",
+    "bias": "bearish",
+    "confidence": 80,
+    "entry": "1.08350",
+    "stop_loss": "1.08450",
+    "take_profit": "1.08200",
+    "risk_reward": "1:2",
+    "confluences": [
+      "Order Block",
+      "FVG",
+      "Liquidity Pool",
+      "Imbalance"
+    ],
+    "short_analysis": "The chart shows a clear bearish trend with a recent higher high and higher low. The price is currently at a key resistance level.",
+    "image_path": "assets/analyzed_chart.png"
+  },
+  {
+    "id": 16,
+    "timestamp": "2026-06-07 10:27:17",
+    "direction": "BUY",
+    "bias": "bullish",
+    "confidence": 80,
+    "entry": "around 0.618",
+    "stop_loss": "below the order block",
+    "take_profit": "near the buy side liquidity",
+    "risk_reward": "1:2",
+    "confluences": [
+      "Order Block",
+      "FVG",
+      "Liquidity Sweep"
+    ],
+    "short_analysis": "The chart shows a bullish bias with a recent liquidity sweep and a buy side liquidity pool above.",
+    "image_path": "assets/analyzed_chart.png"
+  },
+  {
+    "id": 15,
+    "timestamp": "2026-06-07 10:25:41",
+    "direction": "SELL",
+    "bias": "bearish",
+    "confidence": 80,
+    "entry": "1.23456",
+    "stop_loss": "1.23500",
+    "take_profit": "1.23000",
+    "risk_reward": "1:2",
+    "confluences": [
+      "Order Block",
+      "FVG",
+      "Liquidity Pool",
+      "Imbalance"
+    ],
+    "short_analysis": "Bearish momentum with a clear BOS and LH, indicating potential downside.",
+    "image_path": "assets/analyzed_chart.png"
+  },
+  {
+    "id": 14,
+    "timestamp": "2026-06-07 10:22:58",
+    "direction": "NEUTRAL",
+    "bias": "neutral",
+    "confidence": 0,
+    "entry": "",
+    "stop_loss": "",
+    "take_profit": "",
+    "risk_reward": "",
+    "confluences": [],
+    "short_analysis": "The chart image is not visible, making analysis impossible.",
+    "image_path": "assets/analyzed_chart.png"
+  },
+  {
+    "id": 13,
+    "timestamp": "2026-06-07 09:12:46",
+    "direction": "SELL",
+    "bias": "bearish",
+    "confidence": 80,
+    "entry": "4327.885",
+    "stop_loss": "4350.000",
+    "take_profit": "4300.000",
+    "risk_reward": "1:2",
+    "confluences": [
+      "Order Block",
+      "FVG",
+      "Liquidity Pool",
+      "Imbalance"
+    ],
+    "short_analysis": "The chart shows a bearish trend with a recent lower high and lower low. The price is currently at a key level of 4327.885, which could be a potential entry point for a short trade.",
+    "image_path": "assets/analyzed_chart.png"
+  },
+  {
+    "id": 12,
+    "timestamp": "2026-06-07 09:05:59",
+    "direction": "SELL",
+    "bias": "bearish",
+    "confidence": 80,
+    "entry": "4327.885",
+    "stop_loss": "4350.000",
+    "take_profit": "4300.000",
+    "risk_reward": "1:2",
+    "confluences": [
+      "Order Block",
+      "FVG",
+      "Liquidity Pool",
+      "Imbalance"
+    ],
+    "short_analysis": "The chart shows a clear downtrend with a recent lower high and lower low. The price is currently at a key level of 4327.885, which could act as a resistance.",
+    "image_path": "assets/analyzed_chart.png"
+  },
+  {
     "id": 11,
     "timestamp": "2026-06-07 08:19:02",
     "direction": "SELL",
