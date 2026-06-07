@@ -1,0 +1,202 @@
+[
+  {
+    "id": 11,
+    "timestamp": "2026-06-07 08:19:02",
+    "direction": "SELL",
+    "bias": "bearish",
+    "confidence": 80,
+    "entry": "4327.160",
+    "stop_loss": "4348.610",
+    "take_profit": "4275.000",
+    "risk_reward": "1:2",
+    "confluences": [
+      "Order Block",
+      "FVG",
+      "Liquidity Pool",
+      "Bearish Imbalance"
+    ],
+    "short_analysis": "The chart shows a clear bearish trend with a recent lower low and lower high, indicating a break of structure. The price is currently at a significant level, with a potential sell entry at 4327.160.",
+    "image_path": "assets/analyzed_chart.png"
+  },
+  {
+    "id": 10,
+    "timestamp": "2026-06-07 08:17:15",
+    "direction": "BUY",
+    "bias": "bullish",
+    "confidence": 70,
+    "entry": "60718",
+    "stop_loss": "60100",
+    "take_profit": "65000",
+    "risk_reward": "1:2",
+    "confluences": [
+      "Order Block",
+      "FVG",
+      "Liquidity Pool"
+    ],
+    "short_analysis": "The chart shows a potential reversal at 60718, with a bullish bias.",
+    "image_path": "assets/analyzed_chart.png"
+  },
+  {
+    "id": 9,
+    "timestamp": "2026-06-07 08:16:51",
+    "direction": "BUY",
+    "bias": "bullish",
+    "confidence": 70,
+    "entry": "60400",
+    "stop_loss": "59600",
+    "take_profit": "62000",
+    "risk_reward": "1:2",
+    "confluences": [
+      "Order Block",
+      "FVG",
+      "Liquidity Pool"
+    ],
+    "short_analysis": "The chart shows a bullish reversal with a recent low at around 59500 and a break of structure to the upside.",
+    "image_path": "assets/analyzed_chart.png"
+  },
+  {
+    "id": 8,
+    "timestamp": "2026-06-07 08:16:26",
+    "direction": "BUY",
+    "bias": "bullish",
+    "confidence": 70,
+    "entry": "60718",
+    "stop_loss": "60200",
+    "take_profit": "65000",
+    "risk_reward": "1:2",
+    "confluences": [
+      "Order Block",
+      "FVG",
+      "Liquidity Pool",
+      "Imbalance"
+    ],
+    "short_analysis": "The chart shows a bullish reversal at 60718, with potential for uptrend continuation.",
+    "image_path": "assets/analyzed_chart.png"
+  },
+  {
+    "id": 7,
+    "timestamp": "2026-06-07 08:16:06",
+    "direction": "BUY",
+    "bias": "bullish",
+    "confidence": 70,
+    "entry": "60500",
+    "stop_loss": "59700",
+    "take_profit": "62000",
+    "risk_reward": "1:2",
+    "confluences": [
+      "Order Block",
+      "FVG",
+      "Liquidity Pool"
+    ],
+    "short_analysis": "The chart shows a bullish reversal with a clear lower low and break of structure. The price is currently trading above a potential order block.",
+    "image_path": "assets/analyzed_chart.png"
+  },
+  {
+    "id": 6,
+    "timestamp": "2026-06-07 08:13:38",
+    "direction": "NEUTRAL",
+    "bias": "bearish",
+    "confidence": 60,
+    "entry": "61,000",
+    "stop_loss": "62,000",
+    "take_profit": "59,000",
+    "risk_reward": "1:2",
+    "confluences": [
+      "Order Block",
+      "FVG",
+      "Liquidity Pool"
+    ],
+    "short_analysis": "The chart shows a bearish trend with a recent lower low and lower high. The price is currently consolidating around 61,000.",
+    "image_path": "assets/analyzed_chart.png"
+  },
+  {
+    "id": 5,
+    "timestamp": "2026-06-07 08:13:24",
+    "direction": "NEUTRAL",
+    "bias": "bearish",
+    "confidence": 60,
+    "entry": "61,000",
+    "stop_loss": "62,000",
+    "take_profit": "59,000",
+    "risk_reward": "1:2",
+    "confluences": [
+      "Order Block",
+      "FVG",
+      "Liquidity Pool"
+    ],
+    "short_analysis": "The chart shows a bearish trend with a recent lower low and lower high. The price is currently consolidating around 61,821.",
+    "image_path": "assets/analyzed_chart.png"
+  },
+  {
+    "id": 4,
+    "timestamp": "2026-06-07 08:10:39",
+    "direction": "NEUTRAL",
+    "bias": "bearish",
+    "confidence": 60,
+    "entry": "61,000",
+    "stop_loss": "62,000",
+    "take_profit": "59,000",
+    "risk_reward": "1:2",
+    "confluences": [
+      "Order Block",
+      "FVG",
+      "Liquidity Pool"
+    ],
+    "short_analysis": "The chart shows a bearish trend with a recent lower low and lower high. The price is currently consolidating around 61,821.",
+    "image_path": "assets/analyzed_chart.png"
+  },
+  {
+    "id": 3,
+    "timestamp": "2026-06-07 08:01:37",
+    "direction": "NEUTRAL",
+    "bias": "bearish",
+    "confidence": 60,
+    "entry": "61,500",
+    "stop_loss": "62,000",
+    "take_profit": "60,000",
+    "risk_reward": "1:2",
+    "confluences": [
+      "Order Block",
+      "FVG",
+      "Liquidity Pool"
+    ],
+    "short_analysis": "The chart shows a bearish trend with a recent lower low and lower high. The price is currently at 61,821.",
+    "image_path": "assets/analyzed_chart.png"
+  },
+  {
+    "id": 2,
+    "timestamp": "2026-06-07 08:01:05",
+    "direction": "NEUTRAL",
+    "bias": "bearish",
+    "confidence": 60,
+    "entry": "61,000",
+    "stop_loss": "62,000",
+    "take_profit": "59,000",
+    "risk_reward": "1:2",
+    "confluences": [
+      "Order Block",
+      "FVG",
+      "Liquidity Pool"
+    ],
+    "short_analysis": "The chart shows a bearish trend with a recent lower low and lower high. The price is currently consolidating around 61,824.",
+    "image_path": "assets/analyzed_chart.png"
+  },
+  {
+    "id": 1,
+    "timestamp": "2026-06-07 08:00:40",
+    "direction": "NEUTRAL",
+    "bias": "bearish",
+    "confidence": 60,
+    "entry": "61,500",
+    "stop_loss": "62,500",
+    "take_profit": "60,000",
+    "risk_reward": "1:2",
+    "confluences": [
+      "Order Block",
+      "FVG",
+      "Liquidity Pool"
+    ],
+    "short_analysis": "The chart shows a bearish trend with a recent lower low and lower high. The price is currently consolidating around 61,832.",
+    "image_path": "assets/analyzed_chart.png"
+  }
+]
